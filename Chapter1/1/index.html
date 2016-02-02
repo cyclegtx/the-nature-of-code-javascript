@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<link rel="stylesheet" href="../../assets/css/reset.css">
+	<script src="../../assets/js/pixi.min.js"></script>
+</head>
+<body>
+	<script>
+		var Vector2 = function(x, y) { this.x = x; this.y = y; };
+		Vector2.prototype = {
+		    copy: function() { return new Vector2(this.x, this.y); },
+		    length: function() { return Math.sqrt(this.x * this.x + this.y * this.y); },
+		    sqrLength: function() { return this.x * this.x + this.y * this.y; },
+		    normalize: function() { var inv = 1 / this.length(); return new Vector2(this.x * inv, this.y * inv); },
+		    negate: function() { return new Vector2(-this.x, -this.y); },
+		    add: function(v) { return new Vector2(this.x + v.x, this.y + v.y); },
+		    subtract: function(v) { return new Vector2(this.x - v.x, this.y - v.y); },
+		    multiply: function(f) { return new Vector2(this.x * f, this.y * f); },
+		    divide: function(f) { var invf = 1 / f; return new Vector2(this.x * invf, this.y * invf); },
+		    dot: function(v) { return this.x * v.x + this.y * v.y; }
+		};
+	</script>
+	<script>
+		function car() {
+		  this.maxSpeed = new Vector2(2,2);
+		  this.velocity = new Vector2(0,0);
+		  this.acceleration = new Vector2(0,0);
+		  this.location = new Vector2(400,300);
+		  this.draw();
+		}
+		car.prototype.draw = function() {
+		  //车身
+		  this.graphics = new PIXI.Graphics();
+		  this.graphics.lineStyle(4, 0xffd900, 1);
+		  this.graphics.beginFill(0x1ff1a7);
+		  this.graphics.drawCircle(0,0, 20);
+		  this.graphics.endFill();	  
+		}	
+		car.prototype.update = function(){
+			//this.velocity.x = this.velocity.x > this.maxSpeed.x?this.maxSpeed.x:this.velocity.x;
+			//this.velocity.y = this.velocity.y > this.maxSpeed.y?this.maxSpeed.y:this.velocity.y;
+			if(this.velocity.sqrLength() < this.maxSpeed.sqrLength()) {
+				this.velocity = this.velocity.add(this.acceleration);
+			}
+			this.location = this.location.add(this.velocity);
+			//边界检测
+			if(this.location.x >= 800 || this.location.x <= 0) {this.velocity.x = -this.velocity.x;this.acceleration.x = -this.acceleration.x;}
+			if(this.location.y >= 600 || this.location.y <= 0) {this.velocity.y = -this.velocity.y;this.acceleration.y = -this.acceleration.y;}
+		  	this.graphics.x = this.location.x;
+		  	this.graphics.y = this.location.y;
+		}		
+	</script>
+	<script>
+		var renderer = new PIXI.WebGLRenderer(800, 600);
+		document.body.appendChild(renderer.view);
+		var stage = new PIXI.Container();
+
+		var car = new car();
+		car.acceleration.x = 0.1;
+		car.acceleration.y = 0.2;
+		stage.addChild(car.graphics);
+		animate();
+
+		function animate() {
+		  requestAnimationFrame(animate);
+		  car.update();
+		  renderer.render(stage);
+		}
+
+		
+	</script>
+</body>
+</html>
