@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>添加多个力</title>
+	<link rel="stylesheet" href="../../assets/css/reset.css">
+	<link rel="stylesheet" href="../../assets/css/index.css">
+	<script src="../../assets/js/jquery-1.12.0.min.js"></script>
+	<script src="../../assets/js/pixi.min.js"></script>
+	<script src="../../assets/js/vector.js"></script>
+</head>
+<body>
+	<script>
+		function Mover() {
+		  //最大速度
+		  this.maxSpeed = 20;
+		  //速度
+		  this.velocity = new Vector(0,0);
+		  //加速度
+		  this.acceleration = new Vector(0,0);
+		  //位置
+		  this.location = new Vector(0,0);
+		  this.draw();
+		}
+		Mover.prototype.draw = function() {
+		  this.graphics = new PIXI.Graphics();
+		  this.graphics.lineStyle(4, 0xffd900, 1);
+		  this.graphics.beginFill(0x1ff1a7);
+		  this.graphics.drawCircle(0,0, 20);
+		  this.graphics.endFill();	  
+		}	
+		Mover.prototype.update = function(){
+			//根据加速度计算速度
+			this.velocity.add(this.acceleration);
+			this.velocity.limit(this.maxSpeed);
+			//根据速度计算位置
+			this.location.add(this.velocity);
+
+			//下一帧位置
+			var nextPos = this.location.copy().add(this.velocity.copy().add(this.acceleration));
+			//边界检测
+			if(nextPos.x >= 800 || nextPos.x <= 0) {this.velocity.x = -this.velocity.x;this.acceleration.x = -this.acceleration.x;}
+			if(nextPos.y >= 600 || nextPos.y <= 0) {this.velocity.y = -this.velocity.y;this.acceleration.y = -this.acceleration.y;}
+
+			//将位置更新到屏幕中
+		  	this.graphics.x = this.location.x;
+		  	this.graphics.y = this.location.y;
+		}		
+		//将其他力加在物体上，计算其加速度
+		Mover.prototype.applyForce = function(f){
+			this.acceleration.add(f);
+		}
+	</script>
+	<script>
+		var renderer = new PIXI.WebGLRenderer(800, 600);
+		document.body.appendChild(renderer.view);
+		var stage = new PIXI.Container();
+
+		var mover = new Mover();
+		mover.location.x = 400;
+		mover.location.y = 0;
+		mover.applyForce(new Vector(0,0.1));
+		mover.applyForce(new Vector(0.3,0));
+		//mover.acceleration.x = 0.3;
+		stage.addChild(mover.graphics);
+		animate();
+		function animate() {
+		  requestAnimationFrame(animate);
+		  mover.update();
+		  renderer.render(stage);
+		}
+	</script>
+</body>
+</html>
