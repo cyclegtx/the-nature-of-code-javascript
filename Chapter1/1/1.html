@@ -12,43 +12,51 @@
 		function Mover() {
 		  //速度
 		  this.velocity = new Vector(0,0);
-		  //加速度
-		  this.acceleration = new Vector(0,0);
 		  //位置
 		  this.location = new Vector(0,0);
-		  this.draw();
 		}
-		Mover.prototype.draw = function() {
-		  this.graphics = new PIXI.Graphics();
-		  this.graphics.lineStyle(4, 0xffd900, 1);
-		  this.graphics.beginFill(0x1ff1a7);
-		  this.graphics.drawCircle(0,0, 20);
-		  this.graphics.endFill();	  
-		}	
-		Mover.prototype.update = function(){
-			//根据加速度计算速度
-			this.velocity.add(this.acceleration);
+		//逐帧 计算 速度 位置
+		Mover.prototype.calc = function() {
 			//根据速度计算位置
 			this.location.add(this.velocity);
-
+		}
+		//绘制物体	
+		Mover.prototype.draw = function() {
+			this.graphics = new PIXI.Graphics();
+			this.graphics.lineStyle(4, 0xffd900, 1);
+			this.graphics.beginFill(0x1ff1a7);
+			this.graphics.drawCircle(0,0, 20);
+			this.graphics.endFill();	  
+		}
+		//逐帧 将属性更新到视图中	
+		Mover.prototype.update = function(){
 			//将位置更新到屏幕中
 		  	this.graphics.x = this.location.x;
 		  	this.graphics.y = this.location.y;
 		}		
 	</script>
 	<script>
+		//初始化PIXI画布
 		var renderer = new PIXI.WebGLRenderer(800, 600);
 		document.body.appendChild(renderer.view);
 		var stage = new PIXI.Container();
 
+		//实例化mover类
 		var mover = new Mover();
+		//将mover移动到屏幕顶部中间
 		mover.location.x = 400;
 		mover.location.y = 0;
-		mover.acceleration.y = 0.1;
+		mover.draw();
+		//将速度设为延y轴向下1个像素
+		mover.velocity.y = 1;
+		//将mover添加到画布中
 		stage.addChild(mover.graphics);
+
+		//动画循环 
 		animate();
 		function animate() {
 		  requestAnimationFrame(animate);
+		  mover.calc();
 		  mover.update();
 		  renderer.render(stage);
 		}
